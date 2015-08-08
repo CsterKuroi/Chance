@@ -4,8 +4,11 @@ import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +18,8 @@ import android.widget.ImageView;
 import com.kuroi.chance.R;
 import com.kuroi.chance.model.Chance;
 import com.kuroi.chance.service.Service;
+
+import java.io.File;
 
 
 public class DetailActivity extends ActionBarActivity {
@@ -61,6 +66,13 @@ public class DetailActivity extends ActionBarActivity {
             ourSigner.setText(chance.getOurSigner());
             cusSigner.setText(chance.getCusSigner());
             remark.setText(chance.getRemark());
+            if(new File(chance.getImg()).isFile()){
+                BitmapFactory.Options option = new BitmapFactory.Options();
+                option.inSampleSize = 10;
+                Bitmap bm = BitmapFactory.decodeFile(chance.getImg(),option);
+                Log.d(ACTIVITY_TAG, "sim");
+                image.setImageBitmap(bm);}
+            Log.d(ACTIVITY_TAG, "3");
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         image.setOnClickListener(new View.OnClickListener() {
