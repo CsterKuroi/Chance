@@ -170,7 +170,7 @@ public class MainActivity extends ActionBarActivity {
             Log.d(ACTIVITY_TAG,"ok");
             switch (resultCode) {
                 case Activity.RESULT_OK:
-                    Log.d(ACTIVITY_TAG, "ok1");
+                    Log.d(ACTIVITY_TAG, picName);
                     Chance cc=new Chance();
                     cc.setName("照片模式");
                     cc.setImg(Environment.getExternalStoragePublicDirectory(
@@ -179,10 +179,10 @@ public class MainActivity extends ActionBarActivity {
                     Log.d(ACTIVITY_TAG, picName);
                     break;
                 case Activity.RESULT_CANCELED:
-                    Log.d(ACTIVITY_TAG, "ok3");
+                    Log.d(ACTIVITY_TAG, "nonononononono");
                     break;
             }
-            Log.d(ACTIVITY_TAG,"ok4");
+            Log.d(ACTIVITY_TAG,"zzzzzzzzzzzzzzz");
         }
     }
     @Override
