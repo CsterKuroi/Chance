@@ -3,6 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Chance.iml" filepath="$PROJECT_DIR$/Chance.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ChanceCG/ChanceCG.iml" filepath="$PROJECT_DIR$/ChanceCG/ChanceCG.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ChanceGS/ChanceGS.iml" filepath="$PROJECT_DIR$/ChanceGS/ChanceGS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/KLModule/KLModule.iml" filepath="$PROJECT_DIR$/KLModule/KLModule.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

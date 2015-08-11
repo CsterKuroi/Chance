@@ -9,6 +9,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/ChanceCG" />
+            <option value="$PROJECT_DIR$/ChanceGS" />
+            <option value="$PROJECT_DIR$/KLModule" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>
