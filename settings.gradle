@@ -1,1 +1,1 @@
-include ':app', ':KLModule', 'ChanceCG', ':ChanceGS'
+include ':app', ':KLModule', ':ChanceGS'

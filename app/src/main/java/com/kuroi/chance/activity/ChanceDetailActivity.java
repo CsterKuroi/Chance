@@ -10,23 +10,27 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.kuroi.chance.R;
 import com.kuroi.chance.model.Chance;
+import com.kuroi.chance.service.ChanceDELETE;
+import com.kuroi.chance.service.ChanceDeleteCallBack;
 import com.kuroi.chance.service.ChanceService;
 
 import java.io.File;
 
-import static com.kuroi.chance.activity.ChanceShowActivity.getExifOrientation;
 
 
-public class ChanceDetailActivity extends Activity {
+public class ChanceDetailActivity extends Activity implements ChanceDeleteCallBack {
     private EditText number=null;
     private EditText name=null;
     private EditText type=null;
@@ -44,9 +48,16 @@ public class ChanceDetailActivity extends Activity {
     private Chance chance=null;
     private ChanceService service=null;
     private static final String ACTIVITY_TAG="LogDemo";
+    private String userID="101";
+
+    private ImageView iv11;
+    private ImageView iv12;
+    private ImageView iv14;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_detail_chance);
         chance = new Chance();
         init();
@@ -70,32 +81,34 @@ public class ChanceDetailActivity extends Activity {
             ourSigner.setText(chance.getOurSigner());
             cusSigner.setText(chance.getCusSigner());
             remark.setText(chance.getRemark());
-            if(new File(chance.getImg()).isFile()){
-                int digree=getExifOrientation(chance.getImg());
-                Bitmap bm;
-                BitmapFactory.Options option = new BitmapFactory.Options();
-                option.inSampleSize = 10;
-                bm = BitmapFactory.decodeFile(chance.getImg(), option);
-                if (digree != 0) {
-                    // 旋转图片
-                    Matrix m = new Matrix();
-                    m.postRotate(digree);
-                    bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(),
-                            bm.getHeight(), m, true);
-                }
-                Log.d(ACTIVITY_TAG, "ok");
-                image.setImageBitmap(bm);
-            }
             Log.d(ACTIVITY_TAG, "3");
         }
-        ActionBar actionBar=getActionBar();
-        actionBar.setDisplayShowHomeEnabled(false);
-        actionBar.setDisplayHomeAsUpEnabled(true);
+//        ActionBar actionBar=getActionBar();
+//        actionBar.setDisplayShowHomeEnabled(false);
+//        actionBar.setDisplayHomeAsUpEnabled(true);
 //        actionBar.setTitle("      机会详情");
         image.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(ChanceDetailActivity.this, ChanceShowActivity.class);
-                intent.putExtra("picName", chance.getImg());
+
+            }
+        });
+
+        iv11.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        iv12.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                dialog();
+            }
+        });
+
+        iv14.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(ChanceDetailActivity.this, ChanceModifyActivity.class);
+                intent.putExtra("id", chance.getId());
                 startActivity(intent);
             }
         });
@@ -115,26 +128,62 @@ public class ChanceDetailActivity extends Activity {
         cusSigner = (EditText)findViewById(R.id.chance_cusSigner);
         remark = (EditText)findViewById(R.id.chance_remark);
         image = (ImageView)findViewById(R.id.image_button);
+        iv11=(ImageView)findViewById(R.id.imageView11);
+        iv12=(ImageView)findViewById(R.id.imageView12);
+        iv14=(ImageView)findViewById(R.id.imageView14);
     }
     private void dialog(){
         Builder builder = new Builder(ChanceDetailActivity.this);
         builder.setMessage("确定删除吗?");
         builder.setTitle("提示");
-        builder.setPositiveButton("确定", new OnClickListener(){
+        builder.setPositiveButton("确定", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                service.delete(chance.getId());
-                finish();
+                deleteToServer();
             }
         });
-        builder.setNegativeButton("取消", new OnClickListener(){
+        builder.setNegativeButton("取消", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
         builder.create().show();
+    }
+
+    private void deleteToServer() {
+        ChanceDELETE delete = new ChanceDELETE(this);
+        String JSONString = delete.deleteJson(chance);
+        delete.delete(JSONString);
+    }
+
+    public void deleteCallBack(String payload) {
+        if (payload.equals("1")) {
+            service.delete(chance.getId());
+            File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES), "Chance");
+            if (!mediaStorageDir.exists()) {
+                if (!mediaStorageDir.mkdirs()) {
+                    return;
+                }
+            }
+            File f1 = new File(mediaStorageDir.getAbsolutePath() + File.separator + userID+"_"+chance.getId()+"_"+"100.jpg");
+            File f2 = new File(mediaStorageDir.getAbsolutePath() + File.separator + userID+"_"+chance.getId()+"_"+"200.jpg");
+            File f3 = new File(mediaStorageDir.getAbsolutePath() + File.separator + userID+"_"+chance.getId()+"_"+"300.jpg");
+            if (f1.exists())  // 判断文件是否存在
+                f1.delete();
+            if (f2.exists())  // 判断文件是否存在
+                f2.delete();
+            if (f2.exists())  // 判断文件是否存在
+                f2.delete();
+            Toast.makeText(this, "删除成功", Toast.LENGTH_LONG).show();
+            finish();
+
+        }
+        else if (payload.equals("2")) {
+            Toast.makeText(this, "删除失败,请检查网络", Toast.LENGTH_LONG).show();
+        }
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

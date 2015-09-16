@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -28,18 +29,30 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kuroi.chance.R;
 import com.kuroi.chance.model.Chance;
+import com.kuroi.chance.service.ChanceDELETE;
+import com.kuroi.chance.service.ChanceDOWN;
+import com.kuroi.chance.service.ChanceDeleteCallBack;
+import com.kuroi.chance.service.ChanceDownCallBack;
 import com.kuroi.chance.service.ChanceService;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -49,7 +62,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class ChanceMainActivity extends Activity {
+public class ChanceMainActivity extends Activity implements ChanceDeleteCallBack,ChanceDownCallBack {
 
     private ListView chance_list=null;
     private EditText search=null;
@@ -71,18 +84,22 @@ public class ChanceMainActivity extends Activity {
     private static final String ACTIVITY_TAG="LogDemo";
     private String picName="";
     private static final int CAPTURE_REQUEST_CODE = 100;
+    private String userID="101";
 
+    private ImageView iv9;
+    private ImageView iv10;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main_chance);
         service = new ChanceService(this);
         init();
 //        getActionBar().setDisplayHomeAsUpEnabled(true);
         getContent();
-        ActionBar actionBar=getActionBar();
-        actionBar.setDisplayShowHomeEnabled(false);
-        actionBar.setDisplayHomeAsUpEnabled(true);
+//        ActionBar actionBar=getActionBar();
+//        actionBar.setDisplayShowHomeEnabled(false);
+//        actionBar.setDisplayHomeAsUpEnabled(true);
 //        actionBar.setTitle("      机会");
         adapter = new ArrayAdapter<String>(this,R.layout.myspinner_chance,m);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -103,6 +120,19 @@ public class ChanceMainActivity extends Activity {
                 search.setText("");
             }
         });
+
+        iv9.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        iv10.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(ChanceMainActivity.this, ChanceAddActivity.class);
+                startActivity(intent);
+            }
+        });
 }
     private void init(){
         chance_list = (ListView)findViewById(R.id.chance_list);
@@ -115,37 +145,152 @@ public class ChanceMainActivity extends Activity {
         relativeLayout2=(RelativeLayout) findViewById(R.id.chance_ss);
         relativeLayout3=(RelativeLayout) findViewById(R.id.chance_search);
         button=(Button)findViewById(R.id.chance_search_button);
+        iv9=(ImageView)findViewById(R.id.imageView9);
+        iv10=(ImageView)findViewById(R.id.imageView10);
     }
     private void getContent(){
-        countview=(TextView) findViewById(R.id.countText);
-//        countview.setText("机会总数:" + service.getCount().toString());
-        List mylist = new ArrayList();
-        String queryName = search.getText().toString();
-        chances = service.getByName(queryName,sort); // get an chances array
-        if(chances != null){
-            for(int i=0; i<chances.size(); i++){
-                Chance chance = (Chance)chances.get(i);
-                Calendar cal = Calendar.getInstance();
-                int year=cal.get(Calendar.YEAR);
-                int month=cal.get(Calendar.MONTH);
-                int dayOfMonth=cal.get(Calendar.DAY_OF_MONTH);
-                String now= new StringBuilder().append(year).append(
-                        (month + 1) < 10 ? "0" + (month + 1) : (month + 1)).append(
-                        (dayOfMonth < 10) ? "0" + dayOfMonth : dayOfMonth).toString();
-                String check=(now.compareTo(chance.getDate())>0&&!chance.getDate().equals(""))?"完成":chance.getDate();
-                // HashMap
-                HashMap map = new HashMap();
-                map.put("tv_number", chance.getId());
-                map.put("tv_money", chance.getMoney());
-                map.put("tv_name", chance.getName());
-                map.put("tv_date", chance.getDate());
-                mylist.add(map);
-            }
+
+        downToServer();
+        
+
+    }
+    private void downToServer() {
+        ChanceDOWN upload = new ChanceDOWN(this);
+        String JSONString = upload.downJson();
+        upload.down(JSONString);
+    }
+    private static String decodeUnicode(String theString) {
+        char aChar;
+        int len = theString.length();
+        StringBuffer outBuffer = new StringBuffer(len);
+        for (int x = 0; x < len;) {
+            aChar = theString.charAt(x++);
+            if (aChar == '\\') {
+                aChar = theString.charAt(x++);
+                if (aChar == 'u') {
+                    // Read the xxxx
+                    int value = 0;
+                    for (int i = 0; i < 4; i++) {
+                        aChar = theString.charAt(x++);
+                        switch (aChar) {
+                            case '0':
+                            case '1':
+                            case '2':
+                            case '3':
+                            case '4':
+                            case '5':
+                            case '6':
+                            case '7':
+                            case '8':
+                            case '9':
+                                value = (value << 4) + aChar - '0';
+                                break;
+                            case 'a':
+                            case 'b':
+                            case 'c':
+                            case 'd':
+                            case 'e':
+                            case 'f':
+                                value = (value << 4) + 10 + aChar - 'a';
+                                break;
+                            case 'A':
+                            case 'B':
+                            case 'C':
+                            case 'D':
+                            case 'E':
+                            case 'F':
+                                value = (value << 4) + 10 + aChar - 'A';
+                                break;
+                            default:
+                                throw new IllegalArgumentException(
+                                        "Malformed   \\uxxxx   encoding.");
+                        }
+
+                    }
+                    outBuffer.append((char) value);
+                } else {
+                    if (aChar == 't')
+                        aChar = '\t';
+                    else if (aChar == 'r')
+                        aChar = '\r';
+                    else if (aChar == 'n')
+                        aChar = '\n';
+                    else if (aChar == 'f')
+                        aChar = '\f';
+                    outBuffer.append(aChar);
+                }
+            } else
+                outBuffer.append(aChar);
         }
-        SimpleAdapter adapter = new SimpleAdapter(this, mylist,R.layout.my_list_item_chance,
-                new String[] {"tv_number","tv_money","tv_name","tv_date"},
-                new int[] {R.id.item_number,R.id.item_money,R.id.item_name,R.id.item_date});
-        chance_list.setAdapter(adapter);
+        return outBuffer.toString();
+    }
+
+    public void downCallBack(String payload){
+        try {
+            JSONObject object=null;
+            String strUTF8 = payload;
+            object = new JSONObject(strUTF8);
+            String err = object.getString("error");
+            if (err.equals("1")) {
+                service.delete();
+                JSONArray array = object.getJSONArray("jihui");
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject obj = (JSONObject) array.get(i);
+                    Chance dataSet = new Chance();
+                    dataSet.setId(obj.getInt("jihuiid"));
+                    dataSet.setNumber(obj.getString("num"));
+                    dataSet.setName(obj.getString("name"));
+                    dataSet.setType(obj.getString("type"));
+                    dataSet.setCustomer(obj.getString("customer"));
+                    dataSet.setDate(obj.getString("date"));
+                    dataSet.setDateStart(obj.getString("datestart"));
+                    dataSet.setDateEnd(obj.getString("dateend"));
+                    dataSet.setMoney(obj.getString("money"));
+                    dataSet.setDiscount(obj.getString("stage"));
+                    dataSet.setPrincipal(obj.getString("principal"));
+                    dataSet.setOurSigner(obj.getString("ourcontacts"));
+                    dataSet.setCusSigner(obj.getString("cuscontacts"));
+                    dataSet.setRemark(obj.getString("remark"));
+                    service.save(dataSet);
+                }
+
+                countview=(TextView) findViewById(R.id.countText);
+//        countview.setText("机会总数:" + service.getCount().toString());
+                List mylist = new ArrayList();
+                String queryName = search.getText().toString();
+                chances = service.getByName(queryName,sort); // get an chances array
+                if(chances != null){
+                    for(int i=0; i<chances.size(); i++){
+                        Chance chance = (Chance)chances.get(i);
+                        Calendar cal = Calendar.getInstance();
+                        int year=cal.get(Calendar.YEAR);
+                        int month=cal.get(Calendar.MONTH);
+                        int dayOfMonth=cal.get(Calendar.DAY_OF_MONTH);
+                        String now= new StringBuilder().append(year).append(
+                                (month + 1) < 10 ? "0" + (month + 1) : (month + 1)).append(
+                                (dayOfMonth < 10) ? "0" + dayOfMonth : dayOfMonth).toString();
+                        String check=(now.compareTo(chance.getDate())>0&&!chance.getDate().equals(""))?"完成":chance.getDate();
+                        // HashMap
+                        HashMap map = new HashMap();
+                        map.put("tv_number", chance.getId());
+                        map.put("tv_money", chance.getMoney());
+                        map.put("tv_name", chance.getName());
+                        map.put("tv_date", chance.getDate());
+                        mylist.add(map);
+                    }
+                }
+                SimpleAdapter adapter = new SimpleAdapter(this, mylist,R.layout.my_list_item_chance,
+                        new String[] {"tv_number","tv_money","tv_name","tv_date"},
+                        new int[] {R.id.item_number,R.id.item_money,R.id.item_name,R.id.item_date});
+                chance_list.setAdapter(adapter);
+            }
+            else if (err.equals("2")) {
+                service.delete();
+                Toast.makeText(this, "查询失败,请检查网络", Toast.LENGTH_LONG).show();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -156,11 +301,8 @@ public class ChanceMainActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.add_chance) {
-            if(popupWindow.isShowing())
-                popupWindow.dismiss();
-            else
-                popUp();
-            return true;
+            Intent intent = new Intent(ChanceMainActivity.this, ChanceAddActivity.class);
+            startActivity(intent);
         }
         if (id == android.R.id.home)
         {
@@ -179,7 +321,7 @@ public class ChanceMainActivity extends Activity {
     //显示PopupWindow菜单
     private void popUp(){
         //设置位置
-        popupWindow.showAsDropDown(this.findViewById(R.id.add_chance), 0, 2);
+        popupWindow.showAsDropDown(this.findViewById(R.id.imageView10), 0, 2);
     }
     public Uri getOutputMediaFileUri() {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
@@ -270,7 +412,6 @@ public class ChanceMainActivity extends Activity {
                     case 0:
                         Intent intent = new Intent(ChanceMainActivity.this, ChanceAddActivity.class);
                         startActivity(intent);
-                        popupWindow.dismiss();
                         break;
                     case 1:
                         Log.d(ACTIVITY_TAG, "open");
@@ -332,8 +473,7 @@ public class ChanceMainActivity extends Activity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
-                            service.delete(chance.getId());
-                            getContent();
+                            deleteToServer();
                         }
                     });
                     builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -349,6 +489,45 @@ public class ChanceMainActivity extends Activity {
                     dismissDialog(OPTION_DIALOG);
                     break;
             }
+        }
+    }
+    private void deleteToServer() {
+        ChanceDELETE delete = new ChanceDELETE(this);
+        String JSONString = delete.deleteJson(chance);
+        delete.delete(JSONString);
+    }
+
+    public void deleteCallBack(String payload) {
+        if (payload.equals("1")) {
+            service.delete(chance.getId());
+            File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES), "Chance");
+            if (!mediaStorageDir.exists()) {
+                if (!mediaStorageDir.mkdirs()) {
+                    return;
+                }
+            }
+            File f1 = new File(mediaStorageDir.getAbsolutePath() + File.separator + userID+"_"+chance.getId()+"_"+"100.jpg");
+            File f2 = new File(mediaStorageDir.getAbsolutePath() + File.separator + userID+"_"+chance.getId()+"_"+"200.jpg");
+            File f3 = new File(mediaStorageDir.getAbsolutePath() + File.separator + userID+"_"+chance.getId()+"_"+"300.jpg");
+            if (f1.exists())  // 判断文件是否存在
+                f1.delete();
+            if (f2.exists())  // 判断文件是否存在
+                f2.delete();
+            if (f2.exists())  // 判断文件是否存在
+                f2.delete();
+            boolean flag = true;
+            if(flag) {
+                Toast.makeText(this, "删除成功", Toast.LENGTH_LONG).show();
+                getContent();
+                Log.e("gggggggg", "55555555555555555555555");
+            }
+            else
+                Toast.makeText(this, "删除失败,请检查网络", Toast.LENGTH_LONG).show();
+
+        }
+        else if (payload.equals("2")) {
+            Toast.makeText(this, "删除失败,请检查网络", Toast.LENGTH_LONG).show();
         }
     }
     class SpinnerSelectedListener implements AdapterView.OnItemSelectedListener {

@@ -13,6 +13,7 @@ import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -22,10 +23,12 @@ import android.widget.Toast;
 import com.kuroi.chance.R;
 import com.kuroi.chance.model.Chance;
 import com.kuroi.chance.service.ChanceService;
+import com.kuroi.chance.service.ChanceUPLOAD;
+import com.kuroi.chance.service.ChanceUploadCallBack;
 
 import java.util.Calendar;
 
-public class ChanceAddActivity extends Activity {
+public class ChanceAddActivity extends Activity implements ChanceUploadCallBack {
     private EditText number=null;
     private EditText name=null;
     private EditText type=null;
@@ -44,16 +47,20 @@ public class ChanceAddActivity extends Activity {
     private Calendar c = null;
     private String picName="";
 
+    private ImageView iv11;
+    private ImageView iv12;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_add_chance);
         service = new ChanceService(this);
         init();
-        ActionBar actionBar = getActionBar();
-        actionBar.setDisplayShowHomeEnabled(false);
-        actionBar.setDisplayHomeAsUpEnabled(true);
+//        ActionBar actionBar = getActionBar();
+//        actionBar.setDisplayShowHomeEnabled(false);
+//        actionBar.setDisplayHomeAsUpEnabled(true);
         customer.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intentcus = new Intent(ChanceAddActivity.this,
@@ -107,6 +114,31 @@ public class ChanceAddActivity extends Activity {
                 showDialog(3);
             }
         });
+        iv11.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                hintKbTwo();
+                finish();
+            }
+        });
+
+        iv12.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if(name.getText().toString().equals(""))
+                    Toast.makeText(ChanceAddActivity.this, "标题不能为空", Toast.LENGTH_LONG).show();
+//            else if(customer.getText().toString().equals(""))
+//                Toast.makeText(this, "客户不能为空", Toast.LENGTH_LONG).show();
+                else if(date.getText().toString().equals(""))
+                    Toast.makeText(ChanceAddActivity.this, "签约日期不能为空", Toast.LENGTH_LONG).show();
+//            else if(principal.getText().toString().equals(""))
+//                Toast.makeText(this, "负责人不能为空", Toast.LENGTH_LONG).show();
+                else if(money.getText().toString().equals(""))
+                    Toast.makeText(ChanceAddActivity.this, "总金额不能为空", Toast.LENGTH_LONG).show();
+                else {
+                    uploadToServer();
+                }
+            }
+        });
+
     }
 //            image.setOnClickListener(new View.OnClickListener() {
 //                public void onClick(View v) {
@@ -280,9 +312,13 @@ public class ChanceAddActivity extends Activity {
         remark = (EditText)findViewById(R.id.chance_remark);
         image = (ImageView)findViewById(R.id.image_view);
         discount=(EditText)findViewById(R.id.chance_discount);
+
+        iv11=(ImageView)findViewById(R.id.imageView11);
+        iv12=(ImageView)findViewById(R.id.imageView12);
     }
     private Chance getContent(){//获取表单
         Chance chance = new Chance();
+        chance.setId(service.getMax()+1);
         chance.setNumber(number.getText().toString());
         chance.setName(name.getText().toString());
         chance.setType(type.getText().toString());
@@ -320,14 +356,7 @@ public class ChanceAddActivity extends Activity {
             else if(money.getText().toString().equals(""))
                 Toast.makeText(this, "总金额不能为空", Toast.LENGTH_LONG).show();
             else {
-                boolean flag = service.save(getContent());
-                if(flag) {
-                    hintKbTwo();
-                    Toast.makeText(this, "添加成功", Toast.LENGTH_LONG).show();
-                    finish();
-                }
-                else
-                    Toast.makeText(this, "添加失败", Toast.LENGTH_LONG).show();
+                uploadToServer();
             }
 
             return true;
@@ -338,6 +367,28 @@ public class ChanceAddActivity extends Activity {
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+    private void uploadToServer() {
+        ChanceUPLOAD upload = new ChanceUPLOAD(this);
+        String JSONString = upload.changeArrayDateToJson(getContent());
+        upload.up(JSONString);
+    }
+
+    public void uploadCallBack(String payload) {
+        if (payload.equals("1")) {
+            boolean flag = service.save(getContent());
+            if(flag) {
+                hintKbTwo();
+                Toast.makeText(this, "添加成功", Toast.LENGTH_LONG).show();
+                finish();
+            }
+            else
+                Toast.makeText(this, "添加失败,请检查网络", Toast.LENGTH_LONG).show();
+
+        }
+        else if (payload.equals("2")) {
+            Toast.makeText(this, "添加失败,请检查网络", Toast.LENGTH_LONG).show();
+        }
     }
     private void hintKbTwo() {
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);

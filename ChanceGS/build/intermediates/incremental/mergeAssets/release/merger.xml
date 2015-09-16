@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="C:\Users\Kuroi\Documents\GitHub\Chance\ChanceGS\src\main\assets"><file name="test.json" path="C:\Users\Kuroi\Documents\GitHub\Chance\ChanceGS\src\main\assets\test.json"/></source></dataSet><dataSet config="release"><source path="C:\Users\Kuroi\Documents\GitHub\Chance\ChanceGS\src\release\assets"/></dataSet></merger>
+<merger version="3"><dataSet config="main"><source path="F:\Chance-master\ChanceGS\src\main\assets"><file name="test.json" path="F:\Chance-master\ChanceGS\src\main\assets\test.json"/></source></dataSet><dataSet config="release"><source path="F:\Chance-master\ChanceGS\src\release\assets"/></dataSet></merger>

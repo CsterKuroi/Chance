@@ -19,6 +19,7 @@ public class ChanceDBOperation {
 		SQLiteDatabase db = database.getWritableDatabase();
 		if(chance != null){
 			ContentValues value = new ContentValues();
+			value.put("_id", chance.getId());
 			value.put("number", chance.getNumber());
 			value.put("name", chance.getName());
 			value.put("type", chance.getType());
@@ -196,6 +197,14 @@ public class ChanceDBOperation {
 			db.close();
 		}
 	}
+
+	public void delete(){
+		SQLiteDatabase db = database.getWritableDatabase();
+		String sql = "delete from chance";
+		db.execSQL(sql);
+		db.close();
+	}
+
 	public Long getCount() {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = db.rawQuery("select count(*)from chance",null);
@@ -204,6 +213,16 @@ public class ChanceDBOperation {
 		db.close();
 		return count;
 	}
+	public int getMax() {
+		SQLiteDatabase db = database.getReadableDatabase();
+		Cursor cursor = db.rawQuery("select ifnull(max(_id),0) from chance",null);
+		cursor.moveToFirst();
+		int max=cursor.getInt(0);
+		cursor.close();
+		db.close();
+		return max;
+	}
+
 }
 
 

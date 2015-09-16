@@ -2,32 +2,11 @@
 <items version="2" >
 
     <item
-        jar="C:\Users\Kuroi\Documents\GitHub\Chance\app\build\intermediates\exploded-aar\Chance\KLModule\unspecified\jars\libs\autobahn-0.5.0.jar"
+        jar="F:\Chance-master\app\build\intermediates\exploded-aar\Chance-master\ChanceGS\unspecified\jars\classes.jar"
         jumboMode="false"
         revision="19.1.0"
-        sha1="5f62bc6117f905fd37955f6e2ebd3aad68701b60">
-        <dex dex="C:\Users\Kuroi\Documents\GitHub\Chance\app\build\intermediates\pre-dexed\debug\autobahn-0.5.0-4da6e186d7dea2f7496e17e8926b03c41742e8a5.jar" />
-    </item>
-    <item
-        jar="C:\Users\Kuroi\Documents\GitHub\Chance\app\build\intermediates\exploded-aar\Chance\KLModule\unspecified\jars\classes.jar"
-        jumboMode="false"
-        revision="19.1.0"
-        sha1="76d85fadf54469be6c93c24315ae1405a52ad7dd">
-        <dex dex="C:\Users\Kuroi\Documents\GitHub\Chance\app\build\intermediates\pre-dexed\debug\classes-922c37d404e28ca01777b51074713ad99c56e674.jar" />
-    </item>
-    <item
-        jar="C:\Users\Kuroi\Documents\GitHub\Chance\app\build\intermediates\exploded-aar\Chance\ChanceGS\unspecified\jars\classes.jar"
-        jumboMode="false"
-        revision="19.1.0"
-        sha1="04ddc94feeaef2701fcbe8a81f5894784f1669d8">
-        <dex dex="C:\Users\Kuroi\Documents\GitHub\Chance\app\build\intermediates\pre-dexed\debug\classes-c618029e95538fa3f6bd61a03ecfb002332d44c0.jar" />
-    </item>
-    <item
-        jar="D:\Android SDK\extras\android\m2repository\com\android\support\support-v4\19.1.0\support-v4-19.1.0.jar"
-        jumboMode="false"
-        revision="19.1.0"
-        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67">
-        <dex dex="C:\Users\Kuroi\Documents\GitHub\Chance\app\build\intermediates\pre-dexed\debug\support-v4-19.1.0-fd59a36dec17464e4ed56c9729f6b24191808a5c.jar" />
+        sha1="6a059e785859b80983a05d8024fc0f379270e26c">
+        <dex dex="F:\Chance-master\app\build\intermediates\pre-dexed\debug\classes-b85f9e17496fe612d45a242c987b956c01010170.jar" />
     </item>
 
 </items>

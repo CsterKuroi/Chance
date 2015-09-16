@@ -10,7 +10,7 @@ public class ChanceDBChance extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static String sql =
             "create table chance ("
-                    + "_id integer primary key autoincrement, "
+                    + "_id integer primary key , "
                     + "number text, "
                     + "name text, "
                     + "type text, "

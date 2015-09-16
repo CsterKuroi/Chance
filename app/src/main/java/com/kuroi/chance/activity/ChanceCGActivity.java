@@ -3,6 +3,7 @@ package com.kuroi.chance.activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.bmj.tree.bean.CommonContactNode;
 import com.zhy.tree.bean.KLNode;
 import com.bmj.tree_view.CommonContactActivity;
 
@@ -13,15 +14,16 @@ public class ChanceCGActivity extends CommonContactActivity {
     public String getData() {
         String returnstring = "";
         String returnstring2 = "";
-
-        List<KLNode> all =  mAdapter.getAllNode();
-        for (int i = 0; i < all.size(); i++) {
-            if (all.get(i).isChecked && all.get(i).getId() > 10000) {
-                int j = i - 1;
-                while (all.get(j).getId() > 10000)
-                    j--;
-                returnstring += all.get(j).getName()+" ";
-                returnstring2 +=all.get(i).getName()+" ";
+        if(mAdapter!=null) {
+            List<CommonContactNode> all = mAdapter.getAllNode();
+            for (int i = 0; i < all.size(); i++) {
+                if (all.get(i).isChecked && all.get(i).getId() > 10000) {
+                    int j = i - 1;
+                    while (all.get(j).getId() > 10000)
+                        j--;
+                    returnstring += all.get(j).getName() + " ";
+                    returnstring2 += all.get(i).getName() + " ";
+                }
             }
         }
         Intent intent = new Intent();
